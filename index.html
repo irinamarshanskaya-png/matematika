@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#150C36">
+<title>МАТЕМАТИКА — твой мир математики</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<div id="stage">
+  <div id="phone">
+    <div id="screens"></div>
+
+    <nav class="tabbar" id="tabbar">
+      <button class="tab on" data-s="home"><span class="ic">🏠</span>Главная</button>
+      <button class="tab" data-s="map"><span class="ic">🗺️</span>Карта</button>
+      <button class="tab" data-s="progress"><span class="ic">📊</span>Прогресс</button>
+      <button class="tab" data-s="voice"><span class="ic">🎤</span>Тренер</button>
+      <button class="tab" data-s="parents"><span class="ic">👪</span>Родители</button>
+    </nav>
+
+    <div class="toast" id="toast"></div>
+    <div class="sheet" id="sheet"></div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/tasks.js"></script>
+<script src="js/core.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/trainer.js"></script>
+<script src="js/screens.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
