@@ -281,16 +281,22 @@ GEN.addSimple = (p,d)=>{
   else { a = R(1, Math.max(1,max-1)); b = R(1, Math.max(1, max-a)); }
   const ans = a+b;
   const o = numOpts(ans, max>20?5:2, { [a-b>0?a-b:0]:'sign', [ans-1]:'off_one', [ans+1]:'off_one' });
+  /* два двузначных числа устно уже не складывают — такое сразу показываем столбиком;
+     в пределах 20 столбика ещё не проходили, там остаётся строка */
+  const col = max > 20 && a >= 10 && b >= 10;
   return T({
     kind: max>10 ? 'input' : 'choice',
-    q: 'Сколько получится?',
-    say: `Сколько будет ${a} плюс ${b}?`,
-    visual: { t:'expr', html:`${a} + ${b} = <span class="blank">?</span>` },
+    q: col ? 'Сложи столбиком' : 'Сколько получится?',
+    say: col ? `Сложи ${a} и ${b}.` : `Сколько будет ${a} плюс ${b}?`,
+    visual: col ? { t:'column', a, b, op:'+' }
+                : { t:'expr', html:`${a} + ${b} = <span class="blank">?</span>` },
     options: o.options, mmap: o.mmap,
     answer: String(ans),
-    hint: `Начни с ${a} и прибавляй по одному ${b} раз.`,
-    explain: [`Берём ${a} и прибавляем ${b}.`, `${a} + ${b} = ${ans}.`],
-    mtype:'count'
+    hint: col ? 'Складывай справа налево: сначала единицы, потом десятки.'
+              : `Начни с ${a} и прибавляй по одному ${b} раз.`,
+    explain: col ? ['Пишем единицы под единицами, десятки под десятками.', `${a} + ${b} = ${ans}.`]
+                 : [`Берём ${a} и прибавляем ${b}.`, `${a} + ${b} = ${ans}.`],
+    mtype: col ? 'place' : 'count'
   });
 };
 
