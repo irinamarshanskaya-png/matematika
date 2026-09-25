@@ -271,6 +271,23 @@ function buildTopic(levelId, topic, count){
   for(let i=0;i<count;i++) out.push(pool[i % pool.length]);
   return shuffle(out);
 }
+/* таблица умножения: ключ навыка и прогресс по каждому числу */
+const mulKey = sk => skillKey(MUL_LEVEL, MUL_TOPIC.id, sk.id);
+const mulMastery = sk => (P().skills[mulKey(sk)] || { m:0 }).m;
+function mulProgress(){
+  const list = MUL_SKILLS.map(mulMastery);
+  return {
+    avg: Math.round(list.reduce((a,b)=>a+b,0) / list.length),
+    done: list.filter(m=> starsOf(m) >= 5).length,
+    total: list.length
+  };
+}
+function buildMul(skill, count){
+  return Array.from({length:count||10}, ()=>(
+    { level:MUL_LEVEL, topic:MUL_TOPIC, skill, key:mulKey(skill) }
+  ));
+}
+
 function buildSkill(levelId, topic, skill, count){
   const it = { level:levelId, topic, skill, key:skillKey(levelId,topic.id,skill.id) };
   return Array.from({length:count||8}, ()=>it);

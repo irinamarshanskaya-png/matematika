@@ -196,6 +196,20 @@ function scrHome(){
         </div>
       </div>
 
+      ${p.level !== 'pre' ? `
+      <button class="card mt16" id="btnMul" style="width:100%;text-align:left;cursor:pointer;color:var(--ink);font-family:inherit;
+               background:linear-gradient(135deg,rgba(52,211,153,.22),rgba(5,150,105,.12));border-color:rgba(52,211,153,.4)">
+        <div class="row">
+          <div style="font-size:30px">✖️</div>
+          <div style="flex:1">
+            <div style="font-size:16px;font-weight:900">Таблица умножения</div>
+            <div style="font-size:12px;color:var(--ink-2);font-weight:700;margin-top:3px">
+              ${mulProgress().done ? `Выучено чисел: ${mulProgress().done} из 8` : 'Отдельная тренировка по каждому числу'}</div>
+          </div>
+          <div style="font-size:20px">›</div>
+        </div>
+      </button>` : ''}
+
       ${p.level === 'pre' ? `
       <button class="card mt16" id="btnReady" style="width:100%;text-align:left;cursor:pointer;color:var(--ink);font-family:inherit;
                background:linear-gradient(135deg,rgba(61,220,151,.22),rgba(34,176,122,.12));border-color:rgba(61,220,151,.4)">
@@ -246,6 +260,7 @@ function scrHome(){
   $('#btnSet').onclick    = openSettings;
   $('#btnProfile').onclick= openSettings;
   const br = $('#btnReady'); if(br) br.onclick = ()=> startSession(buildReadiness(), 'ready');
+  const bm = $('#btnMul');   if(bm) bm.onclick = ()=> go('mul');
 }
 
 /* ==========================================================================
@@ -349,6 +364,47 @@ function scrTopic(){
     const el = e.target.closest('.skill-row'); if(!el) return;
     const sk = topic.skills.find(x=>x.id === el.dataset.s);
     startSession(buildSkill(level, topic, sk, 8), 'skill');
+  };
+}
+
+/* ==========================================================================
+   ТАБЛИЦА УМНОЖЕНИЯ — отдельный раздел
+   ========================================================================== */
+function scrMul(){
+  const pr = mulProgress();
+  setHTML(`
+    <div class="topbar">
+      <button class="icon-btn" id="bBack">←</button>
+      <div class="grow"><div class="screen-title">Таблица умножения</div>
+        <div class="logo-sub">${pr.done ? `Выучено чисел: ${pr.done} из ${pr.total}` : 'Выбери число и тренируйся'}</div></div>
+      <div style="font-size:30px">✖️</div>
+    </div>
+    <div class="scroll">
+      <div class="card mb16">
+        <div class="row mb8"><span style="font-size:14px;font-weight:800">Вся таблица</span>
+          <span class="grow"></span><span style="font-weight:900">${pr.avg}%</span></div>
+        <div class="bar"><i style="width:${pr.avg}%"></i></div>
+      </div>
+      <button class="btn full mb16" id="bAll">Тренировать всю таблицу</button>
+      <div class="h-sec">Выбери число</div>
+      <div class="tiles">
+        ${MUL_SKILLS.map(sk=>{
+          const m = mulMastery(sk), st = starsOf(m);
+          return `<button class="tile" data-n="${sk.id}">
+            <div class="ti" style="background:${MUL_TOPIC.bg}">${sk.n}</div>
+            <div class="tt">на ${sk.n}</div>
+            <div class="ts">${st>=5 ? 'выучено ✓' : m+'%'}</div>
+          </button>`;
+        }).join('')}
+      </div>
+      <div style="height:10px"></div>
+    </div>`);
+
+  $('#bBack').onclick = ()=> go('home');
+  $('#bAll').onclick  = ()=> startSession(buildMul(MUL_ALL, 10), 'mul');
+  root().onclick = e=>{
+    const el = e.target.closest('[data-n]'); if(!el) return;
+    startSession(buildMul(MUL_SKILLS.find(x=>x.id === el.dataset.n), 10), 'mul');
   };
 }
 
@@ -823,13 +879,16 @@ function finishSession(early){
         ${fresh.map(a=>`<div class="ach pop"><div class="em">${a.em}</div>
           <div><div class="nm">${esc(a.name)}</div><div class="ds">${esc(a.desc)}</div></div></div>`).join('')}` : ''}
       <button class="btn full mt16" id="rAgain">Ещё тренировка</button>
-      <button class="btn ghost full mt12" id="rHome">На главную</button>
+      <button class="btn ghost full mt12" id="rHome">${s.mode === 'mul' ? 'К таблице умножения' : 'На главную'}</button>
       <div style="height:10px"></div>
     </div>`, true);
 
   Speech.say(Trainer.summary(s.right, total));
-  $('#rAgain').onclick = ()=> startSession(buildDaily(p.level, 10), 'daily');
-  $('#rHome').onclick  = ()=>{ App.ses = null; go('home'); };
+  /* из таблицы умножения возвращаемся в неё же, а не в общий маршрут */
+  $('#rAgain').onclick = ()=> s.mode === 'mul'
+    ? startSession(s.items, 'mul')
+    : startSession(buildDaily(p.level, 10), 'daily');
+  $('#rHome').onclick  = ()=>{ const mul = s.mode === 'mul'; App.ses = null; go(mul ? 'mul' : 'home'); };
 }
 
 /* диагностика → расставляем стартовые уровни навыков */
@@ -1202,6 +1261,6 @@ function go(name){
   $$('#tabbar .tab').forEach(t=> t.classList.toggle('on', t.dataset.s === App.tab));
   ({
     home: scrHome, map: scrMap, topic: scrTopic, session: scrSession,
-    progress: scrProgress, parents: scrParents, voice: scrVoice
+    progress: scrProgress, parents: scrParents, voice: scrVoice, mul: scrMul
   }[name] || scrHome)();
 }
