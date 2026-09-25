@@ -452,9 +452,9 @@ function renderBody(t){
         <div class="answer-box" id="ansBox">?</div>
         <div class="keypad">
           ${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="key" data-k="${n}">${n}</button>`).join('')}
-          <button class="key" data-k="del">⌫</button>
+          <button class="key sm" data-k="del">⌫<span>Стереть</span></button>
           <button class="key" data-k="0">0</button>
-          <button class="key act" data-k="ok">✓</button>
+          <button class="key act sm" data-k="ok">✓<span>Готово</span></button>
         </div></div>`;
 
     case 'tapCount':
@@ -507,7 +507,12 @@ function bindBody(t){
       if(s.locked) return;
       const v = k.dataset.k;
       if(v === 'del') val = val.slice(0,-1);
-      else if(v === 'ok'){ if(val !== '') answer(val); return; }
+      else if(v === 'ok'){
+        /* пустое «Готово» без ответа выглядит как поломка — говорим, чего ждём */
+        if(val === '') toast('Набери ответ на кнопках');
+        else answer(val);
+        return;
+      }
       else if(val.length < 7) val += v;
       box.textContent = val === '' ? '?' : val;
     });
